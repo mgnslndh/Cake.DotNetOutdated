@@ -27,5 +27,14 @@ namespace Cake.DotNetOutdated
         /// Cake treats any non-zero exit code as a failure unless <see cref="Cake.Core.Tooling.ToolSettings.HandleExitCode"/> accepts it.
         /// </summary>
         public bool FailOnUpdates { get; set; }
+
+        /// <summary>
+        /// Creates a shallow copy, so callers' settings can be adjusted without being modified.
+        /// </summary>
+        /// <returns>The copy.</returns>
+        internal DotNetOutdatedReportSettings Clone()
+        {
+            return (DotNetOutdatedReportSettings)MemberwiseClone();
+        }
     }
 }
