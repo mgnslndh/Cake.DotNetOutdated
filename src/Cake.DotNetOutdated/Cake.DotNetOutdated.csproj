@@ -11,8 +11,8 @@
   <PropertyGroup Label="Package">
     <PackageId>Cake.DotNetOutdated</PackageId>
     <Authors>Magnus Lindhe</Authors>
-    <Description>Cake add-in for the dotnet-outdated tool: report or upgrade outdated NuGet packages and read the JSON report.</Description>
-    <PackageTags>cake;cake-addin;cake-build;dotnet-outdated;nuget;outdated</PackageTags>
+    <Description>Cake add-in for the dotnet-outdated tool: report or upgrade outdated NuGet packages, read the JSON report, and turn it into a GitLab Code Quality report.</Description>
+    <PackageTags>cake;cake-addin;cake-build;dotnet-outdated;nuget;outdated;gitlab;code-quality</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/mgnslndh/Cake.DotNetOutdated</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mgnslndh/Cake.DotNetOutdated.git</RepositoryUrl>
@@ -25,6 +25,10 @@
 
   <ItemGroup>
     <PackageReference Include="Cake.Core" Version="6.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Cake.DotNetOutdated.Tests" />
   </ItemGroup>
 
   <ItemGroup>
