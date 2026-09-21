@@ -87,6 +87,35 @@ public sealed class DotNetOutdatedReportReaderTests
     }
 
     [Fact]
+    public void Should_Treat_A_Null_Projects_Collection_As_Empty()
+    {
+        var report = DotNetOutdatedReportReader.Parse("{\"Projects\":null}");
+
+        Assert.NotNull(report.Projects);
+        Assert.Empty(report.Projects);
+    }
+
+    [Fact]
+    public void Should_Treat_Null_TargetFrameworks_As_Empty()
+    {
+        var report = DotNetOutdatedReportReader.Parse("{\"Projects\":[{\"Name\":\"App\",\"TargetFrameworks\":null}]}");
+
+        var project = Assert.Single(report.Projects);
+        Assert.NotNull(project.TargetFrameworks);
+        Assert.Empty(project.TargetFrameworks);
+    }
+
+    [Fact]
+    public void Should_Treat_Null_Dependencies_As_Empty()
+    {
+        var report = DotNetOutdatedReportReader.Parse("{\"Projects\":[{\"Name\":\"App\",\"TargetFrameworks\":[{\"Name\":\"net8.0\",\"Dependencies\":null}]}]}");
+
+        var framework = Assert.Single(Assert.Single(report.Projects).TargetFrameworks);
+        Assert.NotNull(framework.Dependencies);
+        Assert.Empty(framework.Dependencies);
+    }
+
+    [Fact]
     public void Should_Parse_The_Empty_Report_Written_By_The_Report_Runner()
     {
         Assert.Empty(DotNetOutdatedReportReader.Parse("{\n  \"Projects\": []\n}").Projects);

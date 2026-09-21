@@ -8,10 +8,16 @@ namespace Cake.DotNetOutdated.Report
     /// </summary>
     public sealed class DotNetOutdatedReport
     {
+        private readonly IReadOnlyList<DotNetOutdatedProject> _projects = Array.Empty<DotNetOutdatedProject>();
+
         /// <summary>
         /// Gets the analyzed projects that have outdated dependencies.
         /// </summary>
-        public IReadOnlyList<DotNetOutdatedProject> Projects { get; init; } = Array.Empty<DotNetOutdatedProject>();
+        public IReadOnlyList<DotNetOutdatedProject> Projects
+        {
+            get => _projects;
+            init => _projects = value ?? Array.Empty<DotNetOutdatedProject>();
+        }
     }
 
     /// <summary>
@@ -19,6 +25,8 @@ namespace Cake.DotNetOutdated.Report
     /// </summary>
     public sealed class DotNetOutdatedProject
     {
+        private readonly IReadOnlyList<DotNetOutdatedTargetFramework> _targetFrameworks = Array.Empty<DotNetOutdatedTargetFramework>();
+
         /// <summary>
         /// Gets the project name.
         /// </summary>
@@ -32,7 +40,11 @@ namespace Cake.DotNetOutdated.Report
         /// <summary>
         /// Gets the analyzed target frameworks.
         /// </summary>
-        public IReadOnlyList<DotNetOutdatedTargetFramework> TargetFrameworks { get; init; } = Array.Empty<DotNetOutdatedTargetFramework>();
+        public IReadOnlyList<DotNetOutdatedTargetFramework> TargetFrameworks
+        {
+            get => _targetFrameworks;
+            init => _targetFrameworks = value ?? Array.Empty<DotNetOutdatedTargetFramework>();
+        }
     }
 
     /// <summary>
@@ -40,6 +52,8 @@ namespace Cake.DotNetOutdated.Report
     /// </summary>
     public sealed class DotNetOutdatedTargetFramework
     {
+        private readonly IReadOnlyList<DotNetOutdatedDependency> _dependencies = Array.Empty<DotNetOutdatedDependency>();
+
         /// <summary>
         /// Gets the target framework name, for example <c>net8.0</c>.
         /// </summary>
@@ -48,7 +62,11 @@ namespace Cake.DotNetOutdated.Report
         /// <summary>
         /// Gets the dependencies of the target framework.
         /// </summary>
-        public IReadOnlyList<DotNetOutdatedDependency> Dependencies { get; init; } = Array.Empty<DotNetOutdatedDependency>();
+        public IReadOnlyList<DotNetOutdatedDependency> Dependencies
+        {
+            get => _dependencies;
+            init => _dependencies = value ?? Array.Empty<DotNetOutdatedDependency>();
+        }
     }
 
     /// <summary>

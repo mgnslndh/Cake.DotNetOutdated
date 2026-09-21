@@ -165,15 +165,15 @@ public sealed class DotNetOutdatedReporterTests
     }
 
     [Fact]
-    public void Should_Invoke_The_Users_Post_Action()
+    public void Should_Invoke_The_Users_Post_Action_Exactly_Once()
     {
-        var invoked = false;
+        var invocations = 0;
         var fixture = new ReporterFixture();
-        fixture.Settings.PostAction = _ => invoked = true;
+        fixture.Settings.PostAction = _ => invocations++;
 
         fixture.Run();
 
-        Assert.True(invoked);
+        Assert.Equal(1, invocations);
     }
 
     [Fact]
