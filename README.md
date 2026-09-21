@@ -86,6 +86,77 @@ var major = report.Projects
 
 Note: the JSON does not distinguish transitive from direct dependencies.
 
+## GitLab Code Quality report
+
+Turn the report into a [GitLab Code Quality](https://docs.gitlab.com/ci/testing/code_quality/) report, so outdated
+dependencies show up as findings in merge requests.
+
+### One call
+
+```csharp
+Task("Outdated").Does(() =>
+{
+    DotNetOutdatedGitLabCodeQuality(".", "gl-code-quality-report.json");
+});
+```
+
+With settings:
+
+```csharp
+DotNetOutdatedGitLabCodeQuality(
+    ".",
+    "gl-code-quality-report.json",
+    new DotNetOutdatedReportSettings { Recursive = true, FailOnUpdates = true },
+    new GitLabCodeQualitySettings { MinimumUpgradeSeverity = DotNetOutdatedUpgradeSeverity.Minor });
+```
+
+The tool always writes JSON to a temporary file next to the report, which is removed afterwards; your settings object is
+not modified. With `FailOnUpdates` the report is written **first** and the build then fails (exit code 2) unless
+`HandleExitCode` accepts it, so GitLab still receives the artifact.
+
+### Step by step
+
+```csharp
+DotNetOutdated(".", new DotNetOutdatedReportSettings { OutputFile = "outdated.json" });
+
+var report = ReadDotNetOutdatedReport("outdated.json");
+var issues = ConvertToGitLabCodeQuality(report, new GitLabCodeQualitySettings
+{
+    MajorSeverity = GitLabCodeQualitySeverity.Critical,
+});
+WriteGitLabCodeQualityReport(issues, "gl-code-quality-report.json");
+```
+
+### `.gitlab-ci.yml`
+
+```yaml
+outdated:
+  script:
+    - dotnet tool restore
+    - dotnet cake --target=Outdated
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json
+```
+
+### How findings are built
+
+- One finding per package per *declaring file*. Multi-target projects are grouped (highest severity wins). With Central
+  Package Management the finding is on `Directory.Packages.props`, so several projects that use the same package produce a
+  single finding.
+- Findings point at the real line: `PackageVersion`/`GlobalPackageReference` in the nearest `Directory.Packages.props`, else
+  the `PackageReference` in the project file, else `Directory.Build.props`/`.targets`, else line 1 of the project file
+  (for example for transitive dependencies).
+- Severity: `Major` to `major`, `Minor` to `minor`, `Patch` and `Unknown` to `info` (all configurable); up-to-date
+  dependencies are never reported. `MinimumUpgradeSeverity` drops the lower levels; `Unknown` is always reported.
+- The fingerprint is a hash of the check name, the file path and the package name. It does not contain versions or line
+  numbers, so a new NuGet release does not show up as "1 fixed, 1 new" in the merge request.
+- Paths are relative to `RepositoryRoot` (default: the Cake working directory). A declaration outside the repository falls
+  back to the project file; a project outside the repository is skipped with a warning.
+- Limitations: MSBuild property definitions are not followed (the element declaring the package is located instead), and
+  non-SDK `packages.config` projects fall back to line 1.
+
 ## License
 
 MIT
