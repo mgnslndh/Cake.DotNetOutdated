@@ -50,7 +50,18 @@ namespace Cake.DotNetOutdated.GitLab
             settings.OutputFormat = DotNetOutdatedOutputFormat.Json;
 
             // Exit code 2 (updates found) must not abort before the report is written; it is re-thrown afterwards.
-            settings.HandleExitCode = code => (callersHandler?.Invoke(code) ?? code == 0) || (failOnUpdates && code == 2);
+            // The caller's handler is asked once per exit code; its answer for code 2 decides the final check below.
+            var callerAcceptedTwo = false;
+            settings.HandleExitCode = code =>
+            {
+                var callerAccepted = callersHandler?.Invoke(code);
+                if (code == 2)
+                {
+                    callerAcceptedTwo = callerAccepted ?? false;
+                }
+
+                return (callerAccepted ?? code == 0) || (failOnUpdates && code == 2);
+            };
             settings.PostAction = process =>
             {
                 exitCode = process.GetExitCode();
@@ -73,14 +84,22 @@ namespace Cake.DotNetOutdated.GitLab
             }
             finally
             {
-                var file = _fileSystem.GetFile(temporaryReport);
-                if (file.Exists)
+                // Cleanup must never fail the build or replace the exception that is already propagating.
+                try
                 {
-                    file.Delete();
+                    var file = _fileSystem.GetFile(temporaryReport);
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    _log.Debug("Could not delete the temporary report {0}: {1}", temporaryReport.FullPath, exception.Message);
                 }
             }
 
-            if (failOnUpdates && exitCode == 2 && !(callersHandler?.Invoke(2) ?? false))
+            if (failOnUpdates && exitCode == 2 && !callerAcceptedTwo)
             {
                 throw new CakeException(2, "dotnet-outdated: Process returned an error (exit code 2).");
             }

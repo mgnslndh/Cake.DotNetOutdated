@@ -172,6 +172,68 @@ public sealed class DotNetOutdatedGitLabCodeQualityRunnerTests
     }
 
     [Fact]
+    public void Should_Ask_The_Caller_Once_About_Exit_Code_2()
+    {
+        var calls = 0;
+        var fixture = CreateFixture();
+        fixture.Settings.FailOnUpdates = true;
+        fixture.Settings.HandleExitCode = code =>
+        {
+            calls++;
+            return code is 0 or 2;
+        };
+        fixture.GivenProcessExitsWithCode(2);
+
+        Assert.Null(Record.Exception(() => fixture.Run()));
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
+    public void Should_Not_Fail_When_The_Temporary_Report_Cannot_Be_Deleted()
+    {
+        var fixture = CreateFixture();
+        fixture.DecorateFileSystem = fileSystem => new FaultyFileSystem(fileSystem) { FailOnDelete = { TemporaryReportPath } };
+
+        Assert.Null(Record.Exception(() => fixture.Run()));
+        Assert.Single(JsonDocument.Parse(fixture.FileSystem.ReadAllText(ReportPath)).RootElement.EnumerateArray());
+        Assert.Contains(
+            fixture.Log.Entries,
+            entry => entry.Verbosity == Cake.Core.Diagnostics.Verbosity.Diagnostic
+                && entry.Message.Contains("Could not delete the temporary report", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Should_Still_Throw_The_Exit_Code_Error_When_The_Temporary_Report_Cannot_Be_Deleted()
+    {
+        var fixture = CreateFixture();
+        fixture.Settings.FailOnUpdates = true;
+        fixture.DecorateFileSystem = fileSystem => new FaultyFileSystem(fileSystem) { FailOnDelete = { TemporaryReportPath } };
+        fixture.GivenProcessExitsWithCode(2);
+
+        var result = Record.Exception(() => fixture.Run());
+
+        Assertions.IsCakeException(result, "dotnet-outdated: Process returned an error (exit code 2).");
+        Assert.Equal(2, ((Cake.Core.CakeException)result).ExitCode);
+        Assert.True(fixture.FileSystem.Exist(new FilePath(ReportPath)));
+    }
+
+    [Fact]
+    public void Should_Not_Mask_The_Primary_Exception_When_The_Temporary_Report_Cannot_Be_Deleted()
+    {
+        var fixture = CreateFixture();
+        fixture.DecorateFileSystem = fileSystem => new FaultyFileSystem(fileSystem)
+        {
+            FailOnDelete = { TemporaryReportPath },
+            FailOnRead = { TemporaryReportPath },
+        };
+
+        var result = Record.Exception(() => fixture.Run());
+
+        Assert.IsType<IOException>(result);
+        Assert.Contains("Could not read", result.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Should_Not_Accept_Exit_Code_2_When_Fail_On_Updates_Is_Not_Set()
     {
         var fixture = CreateFixture();

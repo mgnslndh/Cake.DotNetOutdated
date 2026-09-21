@@ -37,6 +37,9 @@ namespace Cake.DotNetOutdated.GitLab
         /// <summary>
         /// Gets or sets the lowest upgrade severity that is reported. Defaults to <see cref="DotNetOutdatedUpgradeSeverity.Patch"/>
         /// (everything). Findings whose severity is <see cref="DotNetOutdatedUpgradeSeverity.Unknown"/> are always reported.
+        /// Use <see cref="DotNetOutdatedUpgradeSeverity.Patch"/>, <see cref="DotNetOutdatedUpgradeSeverity.Minor"/> or
+        /// <see cref="DotNetOutdatedUpgradeSeverity.Major"/>; <see cref="DotNetOutdatedUpgradeSeverity.Unknown"/> orders above
+        /// <see cref="DotNetOutdatedUpgradeSeverity.Major"/>, so setting it reports only findings whose severity is unknown.
         /// </summary>
         public DotNetOutdatedUpgradeSeverity MinimumUpgradeSeverity { get; set; } = DotNetOutdatedUpgradeSeverity.Patch;
     }

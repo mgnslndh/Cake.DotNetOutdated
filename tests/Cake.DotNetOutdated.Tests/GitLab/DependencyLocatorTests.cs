@@ -1,4 +1,5 @@
 using Cake.DotNetOutdated.GitLab;
+using Cake.DotNetOutdated.Tests.Fixtures;
 using Cake.Testing;
 
 namespace Cake.DotNetOutdated.Tests.GitLab;
@@ -222,6 +223,22 @@ public sealed class DependencyLocatorTests
 
         Assert.Equal(Project, location.File.FullPath);
         Assert.Equal(1, location.Line);
+    }
+
+    [Fact]
+    public void Should_Ignore_Files_That_Cannot_Be_Read()
+    {
+        var environment = FakeEnvironment.CreateUnixEnvironment();
+        var fakeFileSystem = new FakeFileSystem(environment);
+        fakeFileSystem.CreateFile(Project).SetContent(SdkProject);
+        fakeFileSystem.CreateFile("/Working/src/App/Directory.Packages.props").SetContent(CentralPackages);
+        var fileSystem = new FaultyFileSystem(fakeFileSystem) { FailOnRead = { "/Working/src/App/Directory.Packages.props" } };
+
+        var location = new DependencyLocator(fileSystem).Locate(Project, "Newtonsoft.Json");
+
+        // The unreadable central packages file is skipped; the package is found in the project file.
+        Assert.Equal(Project, location.File.FullPath);
+        Assert.Equal(6, location.Line);
     }
 
     [Fact]

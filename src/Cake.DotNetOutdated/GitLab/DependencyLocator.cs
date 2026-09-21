@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
@@ -155,7 +156,7 @@ namespace Cake.DotNetOutdated.GitLab
                     using var stream = file.OpenRead();
                     document = XDocument.Load(stream, LoadOptions.SetLineInfo);
                 }
-                catch (XmlException)
+                catch (Exception exception) when (exception is XmlException or IOException or UnauthorizedAccessException)
                 {
                     document = null;
                 }

@@ -114,6 +114,9 @@ The tool always writes JSON to a temporary file next to the report, which is rem
 not modified. With `FailOnUpdates` the report is written **first** and the build then fails (exit code 2) unless
 `HandleExitCode` accepts it, so GitLab still receives the artifact.
 
+If the tool fails, a report file left over from an earlier run at the output path is not removed, so delete it first when the
+workspace is cached.
+
 ### Step by step
 
 ```csharp

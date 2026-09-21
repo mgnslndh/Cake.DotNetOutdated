@@ -12,9 +12,16 @@ internal sealed class GitLabRunnerFixture : DotNetOutdatedFixture<DotNetOutdated
 
     public FakeLog Log { get; } = new FakeLog();
 
+    /// <summary>
+    /// Gets or sets a function that wraps the fake file system the runner uses, for example to make it fail.
+    /// </summary>
+    public Func<FakeFileSystem, IFileSystem> DecorateFileSystem { get; set; }
+
     protected override void RunTool()
     {
-        new DotNetOutdatedGitLabCodeQualityRunner(FileSystem, Environment, ProcessRunner, Tools, Log)
+        IFileSystem fileSystem = DecorateFileSystem?.Invoke(FileSystem) ?? FileSystem;
+
+        new DotNetOutdatedGitLabCodeQualityRunner(fileSystem, Environment, ProcessRunner, Tools, Log)
             .Run(Path, OutputFile, Settings, GitLabSettings);
     }
 }

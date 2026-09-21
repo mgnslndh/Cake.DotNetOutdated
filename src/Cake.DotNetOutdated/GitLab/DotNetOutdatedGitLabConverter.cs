@@ -63,7 +63,8 @@ namespace Cake.DotNetOutdated.GitLab
 
             foreach (var project in report.Projects)
             {
-                if (string.IsNullOrWhiteSpace(project.FilePath))
+                // One malformed entry must never abort the conversion: GitLab has to receive a report.
+                if (project == null || string.IsNullOrWhiteSpace(project.FilePath))
                 {
                     continue;
                 }
@@ -71,7 +72,9 @@ namespace Cake.DotNetOutdated.GitLab
                 var projectFile = new FilePath(project.FilePath).MakeAbsolute(_environment);
 
                 var strongestPerPackage = project.TargetFrameworks
+                    .Where(framework => framework != null)
                     .SelectMany(framework => framework.Dependencies)
+                    .Where(dependency => dependency != null && !string.IsNullOrWhiteSpace(dependency.Name))
                     .Where(dependency => IsReported(dependency, settings))
                     .GroupBy(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase)
                     .Select(group => group.OrderByDescending(dependency => Rank(dependency.UpgradeSeverity)).First());

@@ -396,6 +396,81 @@ public sealed class DotNetOutdatedGitLabConverterTests
     }
 
     [Fact]
+    public void Should_Produce_The_Documented_Fingerprint_For_A_Package_In_A_File()
+    {
+        var context = new Context();
+        context.Add(AppProjectPath, AppProject);
+
+        var issues = context.Converter.Convert(Report(Project(AppProjectPath, Newtonsoft)), null);
+
+        // printf 'outdated-package|src/App/App.csproj|newtonsoft.json' | sha256sum
+        // The fingerprint is the contract GitLab diffs merge requests by: changing the algorithm re-opens every finding.
+        Assert.Equal("999692a4bb671b0c45848adffe139660807320d00558ae3f7167f1ee05fafc9a", Assert.Single(issues).Fingerprint);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Should_Skip_A_Dependency_Without_A_Name(string name)
+    {
+        var context = new Context();
+        context.Add(AppProjectPath, AppProject);
+        var nameless = Dep(name, "1.0.0", "2.0.0", DotNetOutdatedUpgradeSeverity.Major);
+
+        var issues = context.Converter.Convert(Report(Project(AppProjectPath, nameless, Newtonsoft)), null);
+
+        Assert.StartsWith("Newtonsoft.Json ", Assert.Single(issues).Description);
+    }
+
+    [Fact]
+    public void Should_Skip_A_Null_Dependency()
+    {
+        var context = new Context();
+        context.Add(AppProjectPath, AppProject);
+
+        var issues = context.Converter.Convert(Report(Project(AppProjectPath, null, Newtonsoft)), null);
+
+        Assert.StartsWith("Newtonsoft.Json ", Assert.Single(issues).Description);
+    }
+
+    [Fact]
+    public void Should_Skip_A_Null_Target_Framework()
+    {
+        var context = new Context();
+        context.Add(AppProjectPath, AppProject);
+        var project = new DotNetOutdatedProject
+        {
+            Name = "App",
+            FilePath = AppProjectPath,
+            TargetFrameworks = new DotNetOutdatedTargetFramework[]
+            {
+                null,
+                new DotNetOutdatedTargetFramework { Name = "net8.0", Dependencies = new[] { Newtonsoft } },
+            },
+        };
+
+        var issues = context.Converter.Convert(Report(project), null);
+
+        Assert.StartsWith("Newtonsoft.Json ", Assert.Single(issues).Description);
+    }
+
+    [Fact]
+    public void Should_Skip_A_Null_Project()
+    {
+        var context = new Context();
+        context.Add(AppProjectPath, AppProject);
+        var report = new DotNetOutdatedReport
+        {
+            Projects = new DotNetOutdatedProject[] { null, Project(AppProjectPath, Newtonsoft) },
+        };
+
+        var issues = context.Converter.Convert(report, null);
+
+        Assert.StartsWith("Newtonsoft.Json ", Assert.Single(issues).Description);
+    }
+
+    [Fact]
     public void Should_Throw_If_The_Report_Is_Null()
     {
         var context = new Context();
