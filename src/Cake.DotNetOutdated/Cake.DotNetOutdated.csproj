@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <AssemblyName>Cake.DotNetOutdated</AssemblyName>
+    <RootNamespace>Cake.DotNetOutdated</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <VersionPrefix>0.1.0</VersionPrefix>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageId>Cake.DotNetOutdated</PackageId>
+    <Authors>Magnus Lindhe</Authors>
+    <Description>Cake add-in for the dotnet-outdated tool: report or upgrade outdated NuGet packages, read the JSON report, and turn it into a GitLab Code Quality report.</Description>
+    <PackageTags>cake;cake-addin;cake-build;dotnet-outdated;nuget;outdated;gitlab;code-quality</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/mgnslndh/Cake.DotNetOutdated</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mgnslndh/Cake.DotNetOutdated.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Core" Version="6.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Cake.DotNetOutdated.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
