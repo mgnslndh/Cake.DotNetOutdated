@@ -1,7 +1,22 @@
 # Cake.DotNetOutdated
 
+[![NuGet](https://img.shields.io/nuget/v/Cake.DotNetOutdated.svg)](https://www.nuget.org/packages/Cake.DotNetOutdated)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Cake.DotNetOutdated.svg)](https://www.nuget.org/packages/Cake.DotNetOutdated)
+[![Build](https://github.com/mgnslndh/Cake.DotNetOutdated/actions/workflows/build.yml/badge.svg)](https://github.com/mgnslndh/Cake.DotNetOutdated/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A [Cake](https://cakebuild.net) add-in for [dotnet-outdated](https://github.com/dotnet-outdated/dotnet-outdated):
 report or upgrade outdated NuGet packages from your build script, and read the JSON report as a typed model.
+
+## Table of contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Report outdated packages](#report-outdated-packages)
+- [Upgrade packages](#upgrade-packages)
+- [Read the JSON report](#read-the-json-report)
+- [GitLab Code Quality report](#gitlab-code-quality-report)
+- [License](#license)
 
 ## Prerequisites
 
